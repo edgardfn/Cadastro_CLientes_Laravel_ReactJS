@@ -30,6 +30,8 @@ Route::group(['middleware' => ['apiJwt']], function () {
         Route::post('/', 'ClientController@save');
         //Atualizar cliente:
         Route::put('/', 'ClientController@update');
+        //Excluir cliente:
+        Route::delete('/{id}', 'ClientController@delete');
     });
 
     //Rota de listar clientes:

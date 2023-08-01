@@ -20,7 +20,7 @@ class ClientController extends Controller
 
     public function index()
     {
-        $clients = $this->client->all();
+        $clients = $this->client->paginate(1);
 
         return response()->json($clients);
     }
@@ -48,5 +48,13 @@ class ClientController extends Controller
         $client->update($data);
 
         return response()->json($client);
+    }
+
+    public function delete($id)
+    {
+        $client = $this->client->find($id);
+        $client->delete();
+
+        return response()->json(['data' => 'Produto foi removido com sucesso!']);
     }
 }
