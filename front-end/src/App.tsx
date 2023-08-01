@@ -1,10 +1,3 @@
-
-
 export function App() {
-
-  return (
-    <>
-      Teste
-    </>
-  )
+  return <>Teste</>
 }
