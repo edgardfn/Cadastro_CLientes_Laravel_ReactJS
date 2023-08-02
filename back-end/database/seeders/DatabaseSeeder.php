@@ -19,5 +19,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'daniel@sysfar.com.br',
             'password' => 'segredo',
         ]);
+
+        \App\Models\Clients::factory(25)->create();
     }
 }
