@@ -1,12 +1,7 @@
-import {
-  ReactNode,
-  createContext,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
+import { ReactNode, createContext, useCallback, useState } from 'react'
 import { api } from '../lib/axios'
 import axios from 'axios'
+import { PostClientData } from '../components/ModalEditClient'
 
 export interface DataClients {
   id: number
@@ -27,6 +22,9 @@ interface ClientsContextType {
   changeTextError: (text: string) => void
   clients: DataClients[]
   totalPages: number
+  addNewClient: ({ birthdate, email, name }: PostClientData) => void
+  showEditPostClientModal: boolean
+  setShowEditPostClientModal: (state: boolean) => void
 }
 
 interface ClientsProviderProps {
@@ -42,6 +40,8 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
   const [errorText, setErrorText] = useState<string>('')
   const [clients, setClients] = useState<DataClients[]>([])
   const [totalPages, setTotalPages] = useState<number>(0)
+  const [showEditPostClientModal, setShowEditPostClientModal] =
+    useState<boolean>(false)
 
   const saveUserAccessToken = (token: string) => {
     setAccessToken(token)
@@ -66,6 +66,41 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
           message = e.response?.data.error
         } else {
           message = 'Erro ao listar clientes!'
+        }
+
+        changeTextError(message)
+        changeStateErrorAlert(true)
+      }
+    },
+    [accessToken],
+  )
+
+  const addNewClient = useCallback(
+    async ({ birthdate, email, name }: PostClientData) => {
+      try {
+        const response = await api.post(
+          `/clients`,
+          {
+            birthdate,
+            email,
+            name,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        )
+        if (response && response.status === 200) {
+          setShowEditPostClientModal(false)
+          fetchClients(1)
+        }
+      } catch (e) {
+        let message = ''
+        if (axios.isAxiosError(e)) {
+          message = e.response?.data.error
+        } else {
+          message = 'Erro ao adicionar cliente!'
         }
 
         changeTextError(message)
@@ -101,6 +136,9 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
         changeTextError,
         clients,
         totalPages,
+        addNewClient,
+        setShowEditPostClientModal,
+        showEditPostClientModal,
       }}
     >
       {children}
