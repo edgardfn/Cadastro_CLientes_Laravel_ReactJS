@@ -20,7 +20,7 @@ class ClientController extends Controller
 
     public function index()
     {
-        $clients = $this->client->paginate(1);
+        $clients = $this->client->paginate(7);
 
         return response()->json($clients);
     }
