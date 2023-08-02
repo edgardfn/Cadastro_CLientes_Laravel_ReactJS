@@ -14,10 +14,14 @@ interface LoginData {
 export function Login() {
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
-  const [errorAlert, setErrorAlert] = useState<boolean>(false)
-  const [errorText, setErrorText] = useState<string>('')
 
-  const { saveUserAccessToken } = useContext(ClientsContext)
+  const {
+    saveUserAccessToken,
+    errorAlert,
+    errorText,
+    changeStateErrorAlert,
+    changeTextError,
+  } = useContext(ClientsContext)
 
   const navigate = useNavigate()
 
@@ -58,8 +62,8 @@ export function Login() {
         message = 'Erro ao realizar o login!'
       }
 
-      setErrorText(message)
-      setErrorAlert(true)
+      changeTextError(message)
+      changeStateErrorAlert(true)
     }
   }, [])
 
@@ -70,8 +74,8 @@ export function Login() {
           variant="outlined"
           severity="error"
           onClose={() => {
-            setErrorText('')
-            setErrorAlert(false)
+            changeTextError('')
+            changeStateErrorAlert(false)
           }}
         >
           {errorText}
