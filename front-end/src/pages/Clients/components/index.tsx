@@ -50,6 +50,10 @@ export function Clients() {
     addNewClient,
     setShowEditPostClientModal,
     showEditPostClientModal,
+    sucessAlert,
+    setSucessAlert,
+    setSucessText,
+    sucessText,
   } = useContext(ClientsContext)
 
   useEffect(() => {
@@ -118,6 +122,18 @@ export function Clients() {
 
   return (
     <>
+      {sucessAlert && (
+        <Alert
+          variant="outlined"
+          severity="success"
+          onClose={() => {
+            setSucessText('')
+            setSucessAlert(false)
+          }}
+        >
+          {sucessText}
+        </Alert>
+      )}
       {errorAlert && (
         <Alert
           variant="outlined"

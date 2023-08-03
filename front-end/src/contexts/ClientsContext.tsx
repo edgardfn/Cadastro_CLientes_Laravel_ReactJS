@@ -25,6 +25,10 @@ interface ClientsContextType {
   addNewClient: ({ birthdate, email, name }: PostClientData) => void
   showEditPostClientModal: boolean
   setShowEditPostClientModal: (state: boolean) => void
+  sucessAlert: boolean
+  setSucessAlert: (state: boolean) => void
+  sucessText: string
+  setSucessText: (text: string) => void
 }
 
 interface ClientsProviderProps {
@@ -37,7 +41,9 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
   const [accessToken, setAccessToken] = useState<string>('')
   const [page, setPage] = useState(1)
   const [errorAlert, setErrorAlert] = useState<boolean>(false)
+  const [sucessAlert, setSucessAlert] = useState<boolean>(false)
   const [errorText, setErrorText] = useState<string>('')
+  const [sucessText, setSucessText] = useState<string>('')
   const [clients, setClients] = useState<DataClients[]>([])
   const [totalPages, setTotalPages] = useState<number>(0)
   const [showEditPostClientModal, setShowEditPostClientModal] =
@@ -93,6 +99,8 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
         )
         if (response && response.status === 200) {
           setShowEditPostClientModal(false)
+          setSucessText('Cliente adicionado com sucesso')
+          setSucessAlert(true)
           fetchClients(1)
         }
       } catch (e) {
@@ -139,6 +147,10 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
         addNewClient,
         setShowEditPostClientModal,
         showEditPostClientModal,
+        setSucessAlert,
+        sucessAlert,
+        sucessText,
+        setSucessText,
       }}
     >
       {children}
