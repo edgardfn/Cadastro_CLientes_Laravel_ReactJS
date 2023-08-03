@@ -16,7 +16,7 @@ import { PencilSimple, Trash } from 'phosphor-react'
 import { ClientsContext, DataClients } from '../../../contexts/ClientsContext'
 import { ButtonAddClient } from './styles'
 import { ModalClient, PostClientData } from '../../../components/ModalClient'
-import { format } from 'date-fns'
+import moment from 'moment'
 
 interface Column {
   id: 'id' | 'name' | 'email' | 'birthdate' | 'actions'
@@ -57,10 +57,28 @@ export function Clients() {
     changeClient,
     setClientIdSelected,
     deleteClient,
+    accessToken,
+    setAccessToken,
   } = useContext(ClientsContext)
 
   useEffect(() => {
-    fetchClients(page)
+    console.log('accessTGOke==', accessToken)
+    if (!accessToken || accessToken === '') {
+      const storedTokenAsJson = localStorage.getItem(
+        '@loremIpsulum-Clients:acess-token-user-1.0.0',
+      )
+      if (storedTokenAsJson) {
+        console.log(
+          'JSON.parse(storedTokenAsJson) ===',
+          JSON.parse(storedTokenAsJson),
+        )
+        const token = JSON.parse(storedTokenAsJson)
+        setAccessToken(token)
+        fetchClients(page, token)
+      }
+    } else {
+      fetchClients(page, accessToken)
+    }
   }, [])
 
   const handleEditClient = (id: number) => {
@@ -98,23 +116,28 @@ export function Clients() {
     { id: 'actions', label: '', minWidth: 70 },
   ]
 
-  const rows = clients.map((client: DataClients) => {
-    const newObjectClient: Data = {
-      ...client,
-      birthdate: client.birthdate
-        ? format(new Date(client.birthdate), 'dd/MM/YYY')
-        : null,
-      actions: returnActionsButtons(client.id),
-    }
-    return newObjectClient
-  })
+  let rows: Data[] | [] = []
+  if (clients) {
+    rows = clients.map((client: DataClients) => {
+      const newObjectClient: Data = {
+        ...client,
+        birthdate: client.birthdate
+          ? moment(new Date(client.birthdate))
+              .add(1, 'day')
+              .format('DD/MM/YYYY')
+          : null,
+        actions: returnActionsButtons(client.id),
+      }
+      return newObjectClient
+    })
+  }
 
   const handleChangePage = (
     event: React.ChangeEvent<unknown>,
     value: number,
   ) => {
     changePaginationPage(value)
-    fetchClients(value)
+    fetchClients(value, accessToken)
   }
 
   const closeAddModal = () => {

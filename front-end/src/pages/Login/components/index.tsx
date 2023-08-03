@@ -53,6 +53,12 @@ export function Login() {
         password,
       })
       saveUserAccessToken(response.data.access_token)
+      const tokenJason = JSON.stringify(response.data.access_token)
+      localStorage.removeItem('@loremIpsulum-Clients:acess-token-user-1.0.0')
+      localStorage.setItem(
+        '@loremIpsulum-Clients:acess-token-user-1.0.0',
+        tokenJason,
+      )
       navigate('/clients')
     } catch (e) {
       let message = ''

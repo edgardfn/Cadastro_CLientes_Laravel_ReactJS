@@ -12,10 +12,11 @@ export interface DataClients {
 
 interface ClientsContextType {
   accessToken: string
+  setAccessToken: (token: string) => void
   saveUserAccessToken: (token: string) => void
   page: number
   changePaginationPage: (page: number) => void
-  fetchClients: (currentPage: number) => void
+  fetchClients: (currentPage: number, token: string) => void
   errorAlert: boolean
   errorText: string
   changeStateErrorAlert: (state: boolean) => void
@@ -66,11 +67,11 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
   }
 
   const fetchClients = useCallback(
-    async (currentPage = page) => {
+    async (currentPage = page, token = accessToken) => {
       try {
         const response = await api.get(`/clients?page=${currentPage}`, {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
         })
         if (response.data) {
@@ -266,6 +267,7 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
         dataClientSelected,
         setDataClientSelected,
         deleteClient,
+        setAccessToken,
       }}
     >
       {children}
