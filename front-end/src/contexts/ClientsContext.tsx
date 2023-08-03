@@ -37,6 +37,7 @@ interface ClientsContextType {
   setClientIdSelected: (id: number) => void
   dataClientSelected: DataClients | null
   setDataClientSelected: (client: DataClients) => void
+  deleteClient: (id: number) => void
 }
 
 interface ClientsProviderProps {
@@ -195,6 +196,34 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
     [accessToken],
   )
 
+  const deleteClient = useCallback(
+    async (id: number) => {
+      try {
+        const response = await api.delete(`/clients/${id}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        if (response.status === 200 && response.statusText === 'OK') {
+          setSucessText('Cliente excluído com sucesso !')
+          setSucessAlert(true)
+          fetchClients(1)
+        }
+      } catch (e) {
+        let message = ''
+        if (axios.isAxiosError(e)) {
+          message = e.response?.data.error
+        } else {
+          message = 'Erro ao excluir um cliente!'
+        }
+
+        changeTextError(message)
+        changeStateErrorAlert(true)
+      }
+    },
+    [accessToken],
+  )
+
   const changePaginationPage = (page: number) => {
     setPage(page)
   }
@@ -236,6 +265,7 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
         setClientIdSelected,
         dataClientSelected,
         setDataClientSelected,
+        deleteClient,
       }}
     >
       {children}

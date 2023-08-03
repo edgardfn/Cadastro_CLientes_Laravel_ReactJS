@@ -56,6 +56,7 @@ export function Clients() {
     setShowEditClientModal,
     changeClient,
     setClientIdSelected,
+    deleteClient,
   } = useContext(ClientsContext)
 
   useEffect(() => {
@@ -69,6 +70,7 @@ export function Clients() {
 
   const handleDeleteClient = (id: number) => {
     setClientIdSelected(id)
+    deleteClient(id)
   }
 
   const returnActionsButtons = (id: number) => {
