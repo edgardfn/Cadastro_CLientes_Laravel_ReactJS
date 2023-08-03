@@ -15,10 +15,8 @@ import { useContext, useEffect } from 'react'
 import { PencilSimple, Trash } from 'phosphor-react'
 import { ClientsContext, DataClients } from '../../../contexts/ClientsContext'
 import { ButtonAddClient } from './styles'
-import {
-  ModalEditClient,
-  PostClientData,
-} from '../../../components/ModalEditClient'
+import { ModalClient, PostClientData } from '../../../components/ModalClient'
+import { format } from 'date-fns'
 
 interface Column {
   id: 'id' | 'name' | 'email' | 'birthdate' | 'actions'
@@ -48,12 +46,16 @@ export function Clients() {
     changeStateErrorAlert,
     changeTextError,
     addNewClient,
-    setShowEditPostClientModal,
-    showEditPostClientModal,
+    setShowAddClientModal,
+    showAddClientModal,
     sucessAlert,
     setSucessAlert,
     setSucessText,
     sucessText,
+    showEditClientModal,
+    setShowEditClientModal,
+    changeClient,
+    setClientIdSelected,
   } = useContext(ClientsContext)
 
   useEffect(() => {
@@ -61,11 +63,12 @@ export function Clients() {
   }, [])
 
   const handleEditClient = (id: number) => {
-    console.log('id ===', id)
+    setClientIdSelected(id)
+    setShowEditClientModal(true)
   }
 
   const handleDeleteClient = (id: number) => {
-    console.log('id ===', id)
+    setClientIdSelected(id)
   }
 
   const returnActionsButtons = (id: number) => {
@@ -96,6 +99,9 @@ export function Clients() {
   const rows = clients.map((client: DataClients) => {
     const newObjectClient: Data = {
       ...client,
+      birthdate: client.birthdate
+        ? format(new Date(client.birthdate), 'dd/MM/YYY')
+        : null,
       actions: returnActionsButtons(client.id),
     }
     return newObjectClient
@@ -109,15 +115,20 @@ export function Clients() {
     fetchClients(value)
   }
 
-  const closeModal = () => {
-    setShowEditPostClientModal(false)
+  const closeAddModal = () => {
+    setShowAddClientModal(false)
+  }
+
+  const closeEditModal = () => {
+    setShowEditClientModal(false)
   }
 
   const addClient = ({ birthdate, email, name }: PostClientData) => {
-    console.log('birthdate ====', birthdate)
-    console.log('email ====', email)
-    console.log('name ====', name)
     addNewClient({ birthdate, email, name })
+  }
+
+  const editClient = ({ birthdate, email, name, id }: PostClientData) => {
+    changeClient({ birthdate, email, name, id })
   }
 
   return (
@@ -146,12 +157,23 @@ export function Clients() {
           {errorText}
         </Alert>
       )}
-      <ModalEditClient
-        handleClose={closeModal}
-        open={showEditPostClientModal}
+      <ModalClient
+        handleClose={closeAddModal}
+        open={showAddClientModal}
         handleClickAdd={addClient}
+        headerText="Adicionar Novo Cliente"
+        buttonText="Adicionar"
+        action="add"
       />
-      <ButtonAddClient onClick={() => setShowEditPostClientModal(true)}>
+      <ModalClient
+        handleClose={closeEditModal}
+        open={showEditClientModal}
+        handleClickAdd={editClient}
+        headerText="Editar Cliente"
+        buttonText="Alterar"
+        action="edit"
+      />
+      <ButtonAddClient onClick={() => setShowAddClientModal(true)}>
         Adicionar
       </ButtonAddClient>
       <Paper

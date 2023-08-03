@@ -1,7 +1,7 @@
 import { ReactNode, createContext, useCallback, useState } from 'react'
 import { api } from '../lib/axios'
 import axios from 'axios'
-import { PostClientData } from '../components/ModalEditClient'
+import { PostClientData } from '../components/ModalClient'
 
 export interface DataClients {
   id: number
@@ -23,12 +23,20 @@ interface ClientsContextType {
   clients: DataClients[]
   totalPages: number
   addNewClient: ({ birthdate, email, name }: PostClientData) => void
-  showEditPostClientModal: boolean
-  setShowEditPostClientModal: (state: boolean) => void
+  changeClient: ({ birthdate, email, name, id }: PostClientData) => void
+  showAddClientModal: boolean
+  setShowAddClientModal: (state: boolean) => void
   sucessAlert: boolean
   setSucessAlert: (state: boolean) => void
   sucessText: string
   setSucessText: (text: string) => void
+  showEditClientModal: boolean
+  setShowEditClientModal: (state: boolean) => void
+  getDataClient: (id: number) => void
+  clientIdSelected: number | null
+  setClientIdSelected: (id: number) => void
+  dataClientSelected: DataClients | null
+  setDataClientSelected: (client: DataClients) => void
 }
 
 interface ClientsProviderProps {
@@ -46,8 +54,11 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
   const [sucessText, setSucessText] = useState<string>('')
   const [clients, setClients] = useState<DataClients[]>([])
   const [totalPages, setTotalPages] = useState<number>(0)
-  const [showEditPostClientModal, setShowEditPostClientModal] =
-    useState<boolean>(false)
+  const [showAddClientModal, setShowAddClientModal] = useState<boolean>(false)
+  const [showEditClientModal, setShowEditClientModal] = useState<boolean>(false)
+  const [clientIdSelected, setClientIdSelected] = useState<number | null>(null)
+  const [dataClientSelected, setDataClientSelected] =
+    useState<DataClients | null>(null)
 
   const saveUserAccessToken = (token: string) => {
     setAccessToken(token)
@@ -98,7 +109,7 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
           },
         )
         if (response && response.status === 200) {
-          setShowEditPostClientModal(false)
+          setShowAddClientModal(false)
           setSucessText('Cliente adicionado com sucesso')
           setSucessAlert(true)
           fetchClients(1)
@@ -109,6 +120,72 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
           message = e.response?.data.error
         } else {
           message = 'Erro ao adicionar cliente!'
+        }
+
+        changeTextError(message)
+        changeStateErrorAlert(true)
+      }
+    },
+    [accessToken],
+  )
+
+  const changeClient = useCallback(
+    async ({ birthdate, email, name, id }: PostClientData) => {
+      try {
+        console.log('dataClientSelected ===', dataClientSelected)
+        console.log('clientIdSelected ====', clientIdSelected)
+        const response = await api.put(
+          `/clients`,
+          {
+            birthdate,
+            email,
+            name,
+            id,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        )
+        if (response && response.status === 200) {
+          setShowEditClientModal(false)
+          setSucessText('Cliente alterado com sucesso')
+          setSucessAlert(true)
+          fetchClients(1)
+        }
+      } catch (e) {
+        let message = ''
+        if (axios.isAxiosError(e)) {
+          message = e.response?.data.error
+        } else {
+          message = 'Erro ao editar cliente!'
+        }
+
+        changeTextError(message)
+        changeStateErrorAlert(true)
+      }
+    },
+    [accessToken],
+  )
+
+  const getDataClient = useCallback(
+    async (id: number) => {
+      try {
+        const response = await api.get(`/clients/${id}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        if (response.data) {
+          setDataClientSelected(response.data)
+        }
+      } catch (e) {
+        let message = ''
+        if (axios.isAxiosError(e)) {
+          message = e.response?.data.error
+        } else {
+          message = 'Erro ao consultar dados de um cliente!'
         }
 
         changeTextError(message)
@@ -145,12 +222,20 @@ export function ClientsProvider({ children }: ClientsProviderProps) {
         clients,
         totalPages,
         addNewClient,
-        setShowEditPostClientModal,
-        showEditPostClientModal,
+        setShowAddClientModal,
+        showAddClientModal,
         setSucessAlert,
         sucessAlert,
         sucessText,
         setSucessText,
+        setShowEditClientModal,
+        showEditClientModal,
+        changeClient,
+        getDataClient,
+        clientIdSelected,
+        setClientIdSelected,
+        dataClientSelected,
+        setDataClientSelected,
       }}
     >
       {children}

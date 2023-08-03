@@ -1,28 +1,58 @@
 import { Box, Modal } from '@mui/material'
-import { useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { ButtonAddNewClient, ContainerModalHeader, InputDate } from './styles'
 import { XCircle } from 'phosphor-react'
+import { ClientsContext } from '../../contexts/ClientsContext'
 
 export interface PostClientData {
   name: string
   email: string
   birthdate: string | null
+  id?: number
 }
 
-interface PropsModalEditClient {
+interface PropsModalClient {
   open: boolean
   handleClose: () => void
   handleClickAdd: ({ birthdate, email, name }: PostClientData) => void
+  headerText: string
+  buttonText: string
+  action: 'add' | 'edit'
 }
 
-export function ModalEditClient({
+export function ModalClient({
   handleClose,
   open,
   handleClickAdd,
-}: PropsModalEditClient) {
+  action,
+  buttonText,
+  headerText,
+}: PropsModalClient) {
   const [name, setName] = useState<string>('')
   const [email, setEmail] = useState<string>('')
   const [birthdate, setBirthDate] = useState<string | null>(null)
+
+  const { getDataClient, clientIdSelected, dataClientSelected } =
+    useContext(ClientsContext)
+
+  useEffect(() => {
+    if (action === 'edit' && clientIdSelected && clientIdSelected) {
+      getDataClient(clientIdSelected)
+    }
+  }, [action, clientIdSelected])
+
+  useEffect(() => {
+    console.log('dataClientSelected ===', dataClientSelected)
+    if (
+      action === 'edit' &&
+      dataClientSelected !== null &&
+      dataClientSelected !== undefined
+    ) {
+      setName(dataClientSelected.name)
+      setEmail(dataClientSelected.email)
+      setBirthDate(dataClientSelected.birthdate)
+    }
+  }, [dataClientSelected])
 
   const style = {
     position: 'absolute' as const,
@@ -61,7 +91,7 @@ export function ModalEditClient({
         }}
       >
         <ContainerModalHeader>
-          <h2 id="parent-modal-title">Adicionar novo Cliente</h2>
+          <h2 id="parent-modal-title">{headerText}</h2>
           <XCircle size={32} onClick={handleClose} />
         </ContainerModalHeader>
 
@@ -71,6 +101,7 @@ export function ModalEditClient({
           type="text"
           placeholder="Digite o nome"
           onChange={(e) => setName(e.target.value)}
+          value={name}
         />
 
         <label htmlFor="email">E-mail:</label>
@@ -80,6 +111,7 @@ export function ModalEditClient({
           placeholder="Digite o e-mail"
           onChange={(e) => setEmail(e.target.value)}
           required
+          value={email}
         />
 
         <label htmlFor="birthdate">Data de Nascimento:</label>
@@ -88,12 +120,19 @@ export function ModalEditClient({
           type="date"
           placeholder="Digite o e-mail"
           onChange={(e) => setBirthDate(e.target.value)}
+          value={birthdate || ''}
         />
         <ButtonAddNewClient
-          onClick={() => handleClickAdd({ birthdate, email, name })}
+          onClick={() =>
+            handleClickAdd(
+              action === 'edit' && clientIdSelected !== null
+                ? { birthdate, email, name, id: clientIdSelected }
+                : { birthdate, email, name },
+            )
+          }
           disabled={disableButtonAddNewClient}
         >
-          Adicionar Novo Cliente
+          {buttonText}
         </ButtonAddNewClient>
       </Box>
     </Modal>
